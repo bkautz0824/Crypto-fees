@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import CollapsibleTable from './components/CryptoTableList.jsx';
+import CollapsibleTable from './components/CryptoFees/CryptoTableList.jsx';
 import axios from 'axios';
 import styled from 'styled-components';
 import "@fontsource/nova-flat"
@@ -30,7 +30,7 @@ const api = axios.create({baseURL: 'https://api.cryptostats.community/api/v1/fee
 
 function App() {
 
-  const [date, setDate] = React.useState(moment(new Date()).subtract(1, 'd').format('YYYY-MM-DD'))
+  const date = (moment(new Date()).subtract(1, 'd').format('YYYY-MM-DD'))
   const [data, setData] = React.useState([])
 
   console.log(date)
@@ -54,7 +54,7 @@ function App() {
   React.useEffect(() => {
     
     fetchApi();
-  }, [])
+  })
   
 
   return (

@@ -40,50 +40,48 @@ userRouter.post('/create', createUser)
 
 
 const addToHoldings = async(req, res) => {
+    const { avg_price, quantity, created_at, action, coin_id, status, user_id } = req.body
     let user
     let coin = {
-        coin_id: req.body.coin_id,
-        quantity: req.body.quantity,
-        avg_price: req.body.price
+        coin_id: coin_id,
+        quantity: quantity,
+        avg_price: avg_price
     }
     let order = {
-        coin_id: req.body.coin_id,
-        created_at: req.body.date,
-        price: req.body.price,
-        action: req.body.action,
-        quantity: req.body.quantity,
-        status: req.body.status
+        coin_id: coin_id,
+        created_at: created_at,
+        price: avg_price,
+        action: action,
+        quantity: quantity,
+        status: status
     }
     try{
-        await User.findOne({ _id: req.body.user_id}).then((res) => user = res).catch((err) => console.log(err))
+        await User.findOne({ _id: user_id}).then((res) => user = res).catch((err) => console.log(err))
         //find user 
-        // console.log(user)
-
         if(!user) return res.status(404).send("User could not be found")
 
-        const positionIndex = user.positions.findIndex(item => item.coin_id === (req.body.coin_id))
+        const positionIndex = user.positions.findIndex(item => item.coin_id === (coin_id))
 
-        if(positionIndex >= 0){
-            let item = user.positions.splice(positionIndex, 1)
-            // console.log(item[0])
-            let quantity = item[0].quantity + req.body.quantity
-            let avgPrice = (item[0].avg_price + req.body.avg_price) / quantity
-            // console.log(quantity, avgPrice)
-            user.positions.push({
-                coin_id: user.coin_id,
-                quantity: quantity,
-                avg_price: avgPrice
-            })
+        if(positionIndex >= 0 && action === 'sell'){
+                    user.positions[positionIndex].quantity = user.positions[positionIndex].quantity - quantity
+                }
+
+        else if(positionIndex >= 0 && action === 'buy'){
+            let newAmount = user.positions[positionIndex].quantity + quantity
+            let newAvgPrice = ((user.positions[positionIndex].avg_price * user.positions[positionIndex].quantity) + (quantity * avg_price)) / newAmount
+
+            user.positions[positionIndex].quantity = newAmount
+            user.positions[positionIndex].avg_price = newAvgPrice
+            
+        }else if(action === 'buy'){
+            user.positions.push(coin)
+            
         }
-
-        console.log(user.positions)
-
-
-        // user.positions.push(coin)
-        // user.orderhistory.push(order)
-        // //add new coin to positions and orderhistory
-        // await user.save()
-        // return res.send(user)
+        user.orderhistory.push(order)
+        
+        //add new coin to positions and orderhistory
+        await user.save()
+        return res.send(user)
     }
     catch(err){
         return res.status(400).send(err)
@@ -104,15 +102,9 @@ const removeHolding = async(req, res) => {
 
         const positionIndex = user.positions.findIndex(item => item.coin_id === (req.body.coin_id))
 
-        const orderIndex = user.orderhistory.findIndex(item => item.coin_id === (req.body.coin_id))
-        console.log(positionIndex, orderIndex)
-
-        if(positionIndex === -1 || orderIndex === -1) return res.status(404).send("Coin is not found in positions")
+        if(positionIndex === -1) return res.status(404).send("Coin is not found in positions")
         user.positions.splice(positionIndex, 1)
 
-        user.orderhistory.splice(orderIndex, 1)
-
-        console.log(user)
         await user.save()
         return res.send(user)
     }
