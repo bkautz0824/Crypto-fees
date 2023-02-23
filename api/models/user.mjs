@@ -14,8 +14,21 @@ const User = mongoose.model("User", new mongoose.Schema({
         type:String,
         required:true,
         minlength:8,
-        maxlength:20
+        // maxlength:20
     },
+    positions: [{
+        coin_id: String,
+        quantity: Number,
+        avg_price: Number,
+    }],
+    orderhistory: [{
+        coin_id: String,
+        created_at: String,
+        price: Number,
+        action: String,
+        quantity: Number,
+        status: String
+    }],
     
 },{timestamps:{
     createdAt:"created_at",
