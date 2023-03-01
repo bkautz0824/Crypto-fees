@@ -3,7 +3,7 @@ import axios from 'axios';
 import styled from 'styled-components';
 import {Button, Select, MenuItem, Box, Modal, TextField} from '@mui/material';
 import {Container, Header, HeaderItem1, HeaderItem2, GraphContainer, HoldingsContainer} from '../../styles/PortfolioStyles'
-import NestedModal from './NestedModal';
+
 
 
 const style = {
@@ -11,13 +11,13 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 300,
+  width: 500,
   height: 500,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4,
-  overflow: 'auto',
+  // overflow: 'auto',
   display: "flex",
   flexDirection: "column"
 };
@@ -29,10 +29,17 @@ let id = 0
 const api = axios.create({baseURL: 'https://api.coinstats.app/public/v1/coins?skip=0&limit=100&currency=US'})
 function PortTracker() {
   const [coins, setCoins] = React.useState([])
-  const [selectedCoin, setSelectCoin] = React.useState("Select")
-
+  const [selectedCoin, setSelectedCoin] = React.useState({
+   
+  })
+  console.log(selectedCoin)
   const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
+  const handleOpen = () => {
+    setOpen(true)
+    setSelectedCoin({
+      
+    })
+  };
   const handleClose = () => setOpen(false);
 
 
@@ -54,11 +61,6 @@ React.useEffect(() => {
   .catch(err => console.log(err))
 }, [])
 
-const handleChange = (res) => {
-  console.log(res)
-  setSelectCoin(res)
-}
-
 
 
   return (
@@ -67,7 +69,7 @@ const handleChange = (res) => {
     {/* <Button variant="contained" style={{width: "200px"}} onClick={handleClick} >Add New Coin</Button> */}
     
 
-<Button onClick={handleOpen} variant={"contained"}>Open modal</Button>
+<Button onClick={handleOpen} variant={"contained"}>Add Coin</Button>
 <Modal
   open={open}
   onClose={handleClose}
@@ -75,16 +77,23 @@ const handleChange = (res) => {
   aria-describedby="modal-modal-description"
 >
   <Box sx={style}>
-    <Select>
+    <Button>Buy</Button>
+    <Button>Sell</Button>
+    <Select 
+      defaultValue={'Select'}
+      style={{height: "5rem", width: "100%", justifyContent: "space-between", alignItems:"center"}}>
+        <MenuItem value={"Select"}>
+          {"Select"}
+        </MenuItem>
       {coins.map((item) => {
             return (
                   <MenuItem 
-                  value={item.id} 
-                  sx={{justifyContent: "space-between", alignItems:"center", width: "50%", height: "50%"}}
-                  onClick={(e) => handleChange(e.target.value)}
+                  value={item.name}
+                  style={{justifyContent: "space-between", alignItems:"center", width: "100%", height: "4rem"}}
+                  onClick={() => setSelectedCoin(item)}
                   >
                     {item.name}
-                    <img src={`${item.icon}`} sx={{height: "10px", width: "10px", position: 'absolute'}}/>
+                    <img src={`${item.icon}`} sx={{height: "5px", width: "100%", position: 'absolute'}}/>
                   </MenuItem>
             
             )
@@ -92,10 +101,13 @@ const handleChange = (res) => {
 
 
     </Select>
-    <div>
-      <TextField label={"Quantity"}>
-
-      </TextField>
+    <div style={{display: "flex", flexDirection: "row", justifyContent: "space-between", width: "100%", marginTop: "2rem"}}>
+      <TextField label={"Quantity"} type={"number"}/>
+          
+     
+      <TextField label={"Price Per Coin"} type={"number"} value={selectedCoin ? Math.round(selectedCoin.price) : 0}/>
+        
+     
     </div>
    
   </Box>

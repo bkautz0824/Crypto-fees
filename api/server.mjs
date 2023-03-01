@@ -1,5 +1,6 @@
 import express from 'express';
 import userRouter from './routes/users.mjs';
+import authRouter from './routes/auth.mjs'
 import cors from 'cors';
 import db from './database.mjs';
 import 'dotenv/config' 
@@ -18,6 +19,7 @@ app.use(cors())
 
 db.connect()
 app.use('/users', userRouter)
+app.use('/auth', authRouter)
 
 // error handler
 app.use(function (err, req, res, next) {

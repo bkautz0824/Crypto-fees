@@ -1,6 +1,7 @@
 import express from 'express';
 import User from '../models/user.mjs';
 import mongoose from 'mongoose';
+import bcrypt from "bcrypt";
 
 const userRouter = express.Router()
 
@@ -21,12 +22,16 @@ userRouter.get('/get-all-users', getAllUsers)
 const createUser = async (req, res, next) => {
     let user = await User.findOne({$or:[{username:req.body.username}]})
     if(user) return res.status(400).send({message:'User already exists'})
+    console.log(req.body)
     try{
         user = await new User({
             username:req.body.username,
             password:req.body.password,
             _id:new mongoose.Types.ObjectId()
+            
         })
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
         await user.save()
         return res.send(user)
     }
